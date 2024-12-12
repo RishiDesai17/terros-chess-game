@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
+import { initialBoard } from "../utils";
 
 const gameSchema = new mongoose.Schema({
   gameId: { type: String, required: true, unique: true },
-  board: { type: [[String]], required: true },
+  board: {
+    type: [[String]],
+    default: () => initialBoard,
+    required: true
+  },
   turn: { type: String, enum: ["white", "black"], required: true },
   players: {
     white: { type: String, required: false },
