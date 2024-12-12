@@ -26,7 +26,7 @@ export function convertToCoordinates(square: string): [number, number] {
     return [row, column];
 }
 
-export function isGameOver(board: string[][], turn: string): boolean {
+export function isGameOver(board: Array<Array<string | null>>, turn: string): boolean {
     const kingPosition = findKing(board, turn);
 
     if (!kingPosition) {
@@ -41,12 +41,12 @@ export function isGameOver(board: string[][], turn: string): boolean {
     return false;
 }
 
-export function isKingInCheck(board: string[][], kingPosition: [number, number], turn: string): boolean {
+export function isKingInCheck(board: Array<Array<string | null>>, kingPosition: [number, number], turn: string): boolean {
     // Implement if time permits
     return false;
 }
 
-export function findKing(board: string[][], turn: string): [number, number] | null {
+export function findKing(board: Array<Array<string | null>>, turn: string): [number, number] | null {
     const king = turn === 'white' ? 'wK' : 'bK';
 
     for (let row = 0; row < 8; row++) {
