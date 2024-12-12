@@ -15,6 +15,11 @@ const io = new Server(server);
 
 connectDB(process.env.MONGO_URL);
 
+interface GameCache {
+  [socketId: string]: string;
+}
+
+let socketToGameRoomMapper: GameCache = {};
 
 io.on("connection", (socket) => {
   socket.on('start-game', async () => {
@@ -39,6 +44,7 @@ io.on("connection", (socket) => {
       game.players.white = socket.id;
       game.status = 'in-progress';
       await game.save();
+      socketToGameRoomMapper[socket.id] = gameId;  // Map socket ID to game ID
       socket.join(gameId);  // Join the game room as the white player
       socket.emit('game-started', game);
       io.to(gameId).emit('game-update', game);
@@ -49,6 +55,7 @@ io.on("connection", (socket) => {
       game.players.black = socket.id;
       game.status = 'in-progress';
       await game.save();
+      socketToGameRoomMapper[socket.id] = gameId;  // Map socket ID to game ID
       socket.join(gameId);  // Join the game room as the black player
       socket.emit('game-started', game);
       io.to(gameId).emit('game-update', game);
@@ -63,6 +70,23 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on('disconnect', async () => {
+    const gameId = socketToGameRoomMapper[socket.id];
+    if (gameId) {
+      const game = await Game.findOne({ gameId });
+
+      if (game) {
+        // Pause the game when a player disconnects
+        game.status = 'paused';
+        await game.save();
+        io.to(game.gameId).emit('game-paused', game);
+      }
+
+      delete socketToGameRoomMapper[socket.id];  // Remove the socket-to-game mapping from the cache
+      socket.leave(gameId);  // Leave the game room when disconnected
+    }
+    console.log('A user disconnected');
+  });
 
 })
 
