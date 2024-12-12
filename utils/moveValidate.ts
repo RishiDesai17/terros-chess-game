@@ -89,7 +89,12 @@ export function isValidMove(board: (string | null)[][], from: string, to: string
     return false;
   }
 
-  switch (piece?.toLowerCase()) {
+  let type: string | null = null;
+  if (piece) {
+    type = piece[1];
+  }
+
+  switch (type?.toLowerCase()) {
     case 'p': // Pawn
       return isValidPawnMove(board, from, to, turn);
     case 'r': // Rook
